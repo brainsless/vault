@@ -1,0 +1,15 @@
+{
+  "name": "@brainsless/vault",
+  "version": "1.0.0",
+  "description": "The only service that can open a Brainsless-sealed environment. Stateless, storage-free, open by design.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --var VAULT_COMMIT:$(git rev-parse --short HEAD)"
+  },
+  "devDependencies": {
+    "wrangler": "4.123.0"
+  }
+}

@@ -1,0 +1,55 @@
+# Tag vX.Y.Z to build, fingerprint, deploy, and publish the fingerprint as a Release.
+
+name: deploy
+on:
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write # create the release that records the fingerprint
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm --prefix worker ci
+
+      - name: Fingerprint the bundle
+        id: fp
+        run: |
+          hash=$(node verify.mjs | awk '{print $NF}')
+          [ -n "$hash" ] || { echo "fingerprint is empty -- refusing to deploy"; exit 1; }
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy
+        working-directory: worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: >
+          npx wrangler deploy
+          --var BACKEND_URL:"${{ secrets.BACKEND_URL }}"
+          --var RUNNER_URL:"${{ secrets.RUNNER_URL }}"
+          --var ALLOWED_ORIGIN:"${{ vars.ALLOWED_ORIGIN }}"
+          --var VAULT_BUILD_HASH:"${{ steps.fp.outputs.hash }}"
+          --var VAULT_COMMIT:"${{ github.sha }}"
+
+      - name: Publish the fingerprint (public, append-only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes "commit: ${{ github.sha }}
+          build fingerprint (sha256 of the deployed Worker bundle): ${{ steps.fp.outputs.hash }}
+
+          Verify the running service is this code:
+              git checkout ${{ github.sha }} && npm --prefix worker ci && node verify.mjs https://vault.brainsless.com"

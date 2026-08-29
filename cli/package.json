@@ -1,0 +1,31 @@
+{
+  "name": "@brainsless/connect",
+  "version": "2.0.0",
+  "description": "Collects the environment variables a repository needs to run, encrypts them on your machine against the Brainsless vault's key, and sends only ciphertext. The control plane that stores them cannot read them.",
+  "bin": {
+    "connect": "connect.mjs"
+  },
+  "type": "module",
+  "files": [
+    "connect.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "homepage": "https://brainsless.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brainsless/vault.git",
+    "directory": "cli"
+  },
+  "keywords": [
+    "brainsless",
+    "env",
+    "sandbox"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

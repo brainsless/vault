@@ -1,0 +1,28 @@
+{
+  "name": "brainsless-vault",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+  // The vault keeps no state on purpose: no KV, no D1, no R2, no Durable Objects. A sealed
+  // environment exists here only for the milliseconds a request takes to open, act, and forget.
+  // Fill these in for your own deployment (left blank here so a fork sets its own).
+  "vars": {
+    // Your control plane's internal API origin. The worker calls /internal/vault/* here.
+    "BACKEND_URL": "",
+    // Your sandbox runner's origin. Pinned here, NEVER taken from a request: the one road plaintext
+    // leaves this Worker on is a write into the sandbox, and a request-controlled destination would
+    // make /env/inject a decryption oracle for a caller that already holds the ciphertext and key.
+    "RUNNER_URL": "",
+    // The one browser origin allowed to seal from your product's own screen. Everything else,
+    // the CLI included, arrives with no Origin and is unaffected by CORS.
+    "ALLOWED_ORIGIN": "",
+    "VAULT_VERSION": "1.0.0",
+    "VAULT_COMMIT": "dev"
+  }
+  // Serve this Worker on a custom domain and pin the CLI's host check to it, e.g.:
+  //   "routes": [{ "pattern": "vault.example.com", "custom_domain": true }]
+  // Secrets, set with `wrangler secret put`, never checked in:
+  //   VAULT_PRIVATE_KEY       PKCS8 PEM matching VAULT_PUBLIC_KEY
+  //   VAULT_BACKEND_KEY       the API/control-plane zone's key: auths callbacks + blob fetches
+  //   VAULT_BOOT_KEY          the boot zone's key: the only one that can reach /env/facts|inject
+  //   VAULT_PREV_PRIVATE_KEY  optional, during rotation (with VAULT_PREV_PUBLIC_KEY var)
+}

@@ -1,0 +1,23 @@
+[project]
+name = "brainsless-connect"
+version = "2.0.0"
+description = "Collects the environment variables a repository needs to run, encrypts them on your machine against the Brainsless vault's key, and sends only ciphertext. The control plane that stores them cannot read them."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+# One dependency, and a deliberately load-bearing one: `cryptography` is the standard, audited
+# implementation of AES-GCM and RSA-OAEP. Python's stdlib has neither, and rolling our own on a
+# tool that touches customer secrets would be the wrong kind of clever.
+dependencies = ["cryptography>=42"]
+keywords = ["brainsless", "env", "sandbox"]
+
+[project.urls]
+Homepage = "https://brainsless.com"
+Repository = "https://github.com/brainsless/vault"
+
+[project.scripts]
+brainsless-connect = "brainsless_connect:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
